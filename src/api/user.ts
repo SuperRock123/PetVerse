@@ -2,8 +2,8 @@ import request from "@/utils/request";
 
 // 用户登录
 export const login = (data: {
-  usernameOrEmail: string;
-  password: string;
+  Email: string;
+  Password: string;
 }) => {
   return request({
     url: "/user/login",
@@ -12,12 +12,12 @@ export const login = (data: {
   });
 };
 
-// 获取用户列表
+// 获取用户列表（分页）
 export const getUserList = (params: {
-  page?: number;
-  pageSize?: number;
-  keyword?: string;
-  status?: number;
+  Page: number;
+  PageSize: number;
+  SortBy?: string;
+  SortOrder?: string;
 }) => {
   return request({
     url: "/user",
@@ -36,13 +36,12 @@ export const getUserById = (id: number) => {
 
 // 创建用户
 export const createUser = (data: {
-  username: string;
-  nickname: string;
-  phone: string;
-  email: string;
-  password: string;
-  avatarUrl?: string;
-  bio?: string;
+  Username: string;
+  Email: string;
+  Password: string;
+  Phone: string;
+  Avatar?: string;
+  Bio?: string;
 }) => {
   return request({
     url: "/user",
@@ -51,13 +50,29 @@ export const createUser = (data: {
   });
 };
 
+// 用户注册
+export const register = (data: {
+  Username: string;
+  Email: string;
+  Password: string;
+  Phone: string;
+  Avatar?: string;
+  Bio?: string;
+}) => {
+  return request({
+    url: "/user/register",
+    method: "post",
+    data,
+  });
+};
+
 // 更新用户信息
 export const updateUser = (id: number, data: {
-  nickname?: string;
-  phone?: string;
-  email?: string;
-  avatarUrl?: string;
-  bio?: string;
+  Username?: string;
+  Email?: string;
+  Phone?: string;
+  Avatar?: string;
+  Bio?: string;
 }) => {
   return request({
     url: `/user/${id}`,
@@ -66,7 +81,7 @@ export const updateUser = (id: number, data: {
   });
 };
 
-// 删除用户
+// 删除用户（软删除）
 export const deleteUser = (id: number) => {
   return request({
     url: `/user/${id}`,

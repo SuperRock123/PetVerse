@@ -1,13 +1,11 @@
 import request from "@/utils/request";
 
-// 获取宠物列表
+// 获取宠物列表（分页）
 export const getPetList = (params: {
-  page?: number;
-  pageSize?: number;
-  userId?: number;
-  keyword?: string;
-  breed?: string;
-  gender?: number;
+  Page: number;
+  PageSize: number;
+  SortBy?: string;
+  SortOrder?: string;
 }) => {
   return request({
     url: "/pet",
@@ -16,7 +14,7 @@ export const getPetList = (params: {
   });
 };
 
-// 获取宠物详情
+// 根据ID获取宠物详情
 export const getPetById = (id: number) => {
   return request({
     url: `/pet/${id}`,
@@ -34,15 +32,15 @@ export const getPetsByUserId = (userId: number) => {
 
 // 创建宠物
 export const createPet = (data: {
-  userId: number;
-  name: string;
-  breed: string;
-  gender: number;
-  birthday: string;
-  weightKg: number;
-  healthStatus: string;
-  avatarUrl?: string;
-  pettagId?: string;
+  UserId: number;
+  Name: string;
+  Breed: string;
+  Gender: number;
+  Birthday: string;
+  WeightKg: number;
+  HealthStatus: string;
+  Avatar?: string;
+  PetTagId?: string;
 }) => {
   return request({
     url: "/pet",
@@ -53,14 +51,14 @@ export const createPet = (data: {
 
 // 更新宠物信息
 export const updatePet = (id: number, data: {
-  name?: string;
-  breed?: string;
-  gender?: number;
-  birthday?: string;
-  weightKg?: number;
-  healthStatus?: string;
-  avatarUrl?: string;
-  pettagId?: string;
+  Name?: string;
+  Breed?: string;
+  Gender?: number;
+  Birthday?: string;
+  WeightKg?: number;
+  HealthStatus?: string;
+  Avatar?: string;
+  PetTagId?: string;
 }) => {
   return request({
     url: `/pet/${id}`,
@@ -69,7 +67,7 @@ export const updatePet = (id: number, data: {
   });
 };
 
-// 删除宠物
+// 删除宠物（软删除）
 export const deletePet = (id: number) => {
   return request({
     url: `/pet/${id}`,
