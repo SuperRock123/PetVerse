@@ -10,7 +10,12 @@ export const storage = {
   get<T>(key: string) {
     const value = localStorage.getItem(key);
     if (value && value != "undefined" && value != "null") {
-      return <T>JSON.parse(value);
+      try {
+        return <T>JSON.parse(value);
+      } catch (e) {
+        // 如果不是JSON格式，直接返回字符串
+        return <T>value;
+      }
     }
   },
   // 删除数据

@@ -2,16 +2,18 @@
   <div class="container">
     <div class="top">
       <header class="mask-paper">
-        <a style="display: flex">烟火</a>
+        <a style="display: flex">PetVerse</a>
         <div class="tool-box"></div>
         <div class="input-box">
-          <input type="text" class="search-input" placeholder="搜索小红书" />
+          <input type="text" class="search-input" placeholder="搜索宠物相关内容" />
           <div class="input-button">
             <div class="close-icon"><Close style="width: 1em; height: 1em; margin-right: 8px" /></div>
             <div class="search-icon"><Search style="width: 1em; height: 1em; margin-right: 8px" /></div>
           </div>
         </div>
-        <div class="right"></div>
+        <div class="right">
+          <ThemeSwitch />
+        </div>
       </header>
     </div>
     <div class="main">
@@ -20,13 +22,28 @@
           <li class="active-channel">
             <a class="link-wrapper"
               ><House style="width: 1em; height: 1em; margin-right: 8px" /><span class="channel" @click="toDashboard()"
-                >发现</span
+                >首页</span
               ></a
             >
           </li>
           <li>
-            <Star style="width: 1em; height: 1em; margin-right: 8px" /><span class="channel" @click="toTrend()">
-              动态</span
+            <Star style="width: 1em; height: 1em; margin-right: 8px" /><span class="channel" @click="toSocial()">
+              社区动态</span
+            >
+          </li>
+          <li>
+            <Pets style="width: 1em; height: 1em; margin-right: 8px" /><span class="channel" @click="toPets()">
+              宠物管理</span
+            >
+          </li>
+          <li>
+            <Cpu style="width: 1em; height: 1em; margin-right: 8px" /><span class="channel" @click="toAi()">
+              AI服务</span
+            >
+          </li>
+          <li>
+            <Location style="width: 1em; height: 1em; margin-right: 8px" /><span class="channel" @click="toMap()">
+              地图服务</span
             >
           </li>
           <li>
@@ -41,12 +58,17 @@
           </li>
           <li>
             <User style="width: 1em; height: 1em; margin-right: 8px" /><span class="channel" @click="toUser()">
-              个人</span
+              个人中心</span
+            >
+          </li>
+          <li>
+            <Key style="width: 1em; height: 1em; margin-right: 8px" /><span class="channel" @click="toAdmin()">
+              管理后台</span
             >
           </li>
         </ul>
-
-        <div class="information-container">
+        <!-- TODO: 底部信息栏 先不展示 -->
+        <!-- <div class="information-container">
           <div class="information-pad">
             <div class="container">
               <div>
@@ -117,7 +139,7 @@
           <div class="information-wrapper">
             <More style="width: 1em; height: 1em; margin-right: 8px" /> <span class="channel"> 更多</span>
           </div>
-        </div>
+        </div> -->
       </div>
       <div class="main-content with-side-bar">
         <router-view />
@@ -141,20 +163,37 @@ import {
   ArrowRight,
   More,
   CirclePlus,
+  // Pets,
+  Cpu,
+  Location,
+  Key,
 } from "@element-plus/icons-vue";
 import { useRouter } from "vue-router";
 import Login from "@/pages/login.vue";
+import ThemeSwitch from "@/components/ThemeSwitch.vue";
 import { ref } from "vue";
 const router = useRouter();
 
 const c = ref(true);
 
 const toDashboard = () => {
-  router.push({ path: "/" });
+  router.push({ path: "/dashboard" });
 };
 
-const toTrend = () => {
-  router.push({ path: "/followTrend" });
+const toSocial = () => {
+  router.push({ path: "/social" });
+};
+
+const toPets = () => {
+  router.push({ path: "/pets" });
+};
+
+const toAi = () => {
+  router.push({ path: "/ai" });
+};
+
+const toMap = () => {
+  router.push({ path: "/map" });
 };
 
 const toMessage = () => {
@@ -164,8 +203,13 @@ const toMessage = () => {
 const toUser = () => {
   router.push({ path: "/user" });
 };
+
 const toPush = () => {
   router.push({ path: "/push" });
+};
+
+const toAdmin = () => {
+  router.push({ path: "/admin" });
 };
 
 const close = (val: boolean) => {
@@ -177,8 +221,10 @@ const close = (val: boolean) => {
 <style lang="less" scoped>
 .container {
   max-width: 1728px;
-  background-color: #fff;
+  background-color: var(--color-background);
   margin: 0 auto;
+  color: var(--color-text);
+  transition: background-color 0.3s, color 0.3s;
 
   .top {
     display: flex;
@@ -191,7 +237,9 @@ const close = (val: boolean) => {
     top: 0;
     z-index: 10;
     align-items: center;
-    background: #fff;
+    background: var(--color-surface);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: background-color 0.3s, box-shadow 0.3s;
 
     header {
       position: relative;
@@ -203,6 +251,13 @@ const close = (val: boolean) => {
       height: 72px;
       padding: 0 16px 0 24px;
       z-index: 10;
+
+      a {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--color-primary);
+        text-decoration: none;
+      }
 
       .tool-box {
         width: 24px;
@@ -243,10 +298,11 @@ const close = (val: boolean) => {
           height: 100%;
           font-size: 16px;
           line-height: 120%;
-          color: #333;
-          caret-color: #ff2442;
+          color: var(--color-text);
+          caret-color: var(--color-primary);
           background: rgba(0, 0, 0, 0.03);
           border-radius: 999px;
+          transition: background-color 0.3s, color 0.3s;
         }
 
         .input-button {
@@ -257,18 +313,26 @@ const close = (val: boolean) => {
           align-items: center;
           justify-content: center;
           height: 100%;
-          color: rgba(51, 51, 51, 0.8);
+          color: var(--color-textSecondary);
+          transition: color 0.3s;
 
-          .close-icon .search-icon {
+          .close-icon, .search-icon {
             width: 40px;
             height: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            color: rgba(51, 51, 51, 0.8);
+            color: var(--color-textSecondary);
+            transition: color 0.3s;
           }
         }
+      }
+
+      .right {
+        display: flex;
+        align-items: center;
+        gap: 16px;
       }
     }
   }
@@ -306,7 +370,7 @@ const close = (val: boolean) => {
 
       height: calc(100vh - 72px);
       overflow-y: scroll;
-      background-color: #fff;
+      background-color: var(--color-surface);
       display: flex;
       flex-direction: column;
       flex-shrink: 0;
@@ -314,6 +378,8 @@ const close = (val: boolean) => {
       margin-top: 72px;
       position: fixed;
       overflow: visible;
+      box-shadow: 2px 0 8px rgba(0, 0, 0, 0.08);
+      transition: background-color 0.3s, box-shadow 0.3s;
 
       .channel-list {
         min-height: auto;
@@ -323,7 +389,7 @@ const close = (val: boolean) => {
         .active-channel {
           background-color: rgba(0, 0, 0, 0.03);
           border-radius: 999px;
-          color: #333;
+          color: var(--color-text);
         }
 
         li {
@@ -333,7 +399,8 @@ const close = (val: boolean) => {
           align-items: center;
           cursor: pointer;
           margin-bottom: 8px;
-          color: rgba(51, 51, 51, 0.6);
+          color: var(--color-textSecondary);
+          transition: color 0.3s;
 
           .link-wrapper {
             display: flex;
@@ -341,23 +408,29 @@ const close = (val: boolean) => {
             height: 48px;
             align-items: center;
           }
+
+          &:hover {
+            color: var(--color-primary);
+          }
         }
 
         .channel {
           font-size: 16px;
           font-weight: 600;
           margin-left: 12px;
-          color: #333;
+          color: var(--color-text);
+          transition: color 0.3s;
         }
       }
 
       .information-container {
         display: inline-block;
         width: 100%;
-        color: #333;
+        color: var(--color-text);
         font-size: 16px;
         position: absolute;
         bottom: 0;
+        transition: color 0.3s;
 
         .information-pad {
           z-index: 16;
@@ -366,18 +439,20 @@ const close = (val: boolean) => {
 
           .container {
             width: 100%;
-            background: #fff;
+            background: var(--color-surface);
             box-shadow:
               0 4px 32px 0 rgba(0, 0, 0, 0.08),
               0 1px 4px 0 rgba(0, 0, 0, 0.04);
             border-radius: 12px;
+            transition: background-color 0.3s, box-shadow 0.3s;
 
             .divider {
               margin: 0px 12px;
               list-style: none;
               height: 0;
-              border: 1px solid rgba(0, 0, 0, 0.08);
+              border: 1px solid var(--color-border);
               border-width: 1px 0 0;
+              transition: border-color 0.3s;
             }
 
             .group-wrapper {
@@ -389,23 +464,30 @@ const close = (val: boolean) => {
                 padding: 0 12px;
                 font-weight: 400;
                 height: 32px;
-                color: rgba(51, 51, 51, 0.6);
+                color: var(--color-textSecondary);
                 font-size: 12px;
+                transition: color 0.3s;
               }
 
               .menu-item {
                 height: 40px;
-                color: rgba(51, 51, 51, 0.8);
+                color: var(--color-textSecondary);
                 font-size: 16px;
                 border-radius: 8px;
                 display: flex;
                 align-items: center;
                 padding: 0 12px;
                 font-weight: 400;
+                transition: color 0.3s, background-color 0.3s;
+
+                &:hover {
+                  background-color: rgba(0, 0, 0, 0.03);
+                }
 
                 .icon {
-                  color: rgba(51, 51, 51, 0.3);
+                  color: var(--color-textSecondary);
                   margin-left: auto;
+                  transition: color 0.3s;
                 }
 
                 .component {
@@ -415,23 +497,25 @@ const close = (val: boolean) => {
                 .multistage-toggle {
                   position: relative;
                   background: rgba(0, 0, 0, 0.03);
-                  display: flex();
+                  display: flex;
                   padding: 2px;
                   border-radius: 999px;
                   cursor: pointer;
 
                   .active {
-                    background: #fff;
+                    background: var(--color-surface);
                     box-shadow:
                       0 2px 8px 0 rgba(0, 0, 0, 0.04),
                       0 1px 2px 0 rgba(0, 0, 0, 0.02);
-                    color: #333;
+                    color: var(--color-text);
+                    transition: background-color 0.3s, box-shadow 0.3s, color 0.3s;
                   }
 
                   .toggle-item {
                     border-radius: 999px;
                     background: transparent;
-                    color: rgba(51, 51, 51, 0.6);
+                    color: var(--color-textSecondary);
+                    transition: color 0.3s;
 
                     .icon-wrapper {
                       width: 24px;
@@ -460,29 +544,38 @@ const close = (val: boolean) => {
           font-weight: 600;
           align-items: center;
           border-radius: 999px;
+          transition: color 0.3s;
+
+          &:hover {
+            color: var(--color-primary);
+          }
         }
       }
     }
 
     .main-content {
       width: 100%;
+      min-height: calc(100vh - 72px);
+      margin-top: 72px;
+      padding: 20px;
+      transition: background-color 0.3s;
     }
 
     .main-content {
       @media screen and (min-width: 960px) and (max-width: 1191px) {
-        padding-left: calc(-6px + 25vw);
+        padding-left: calc(-6px + 25vw + 20px);
       }
 
       @media screen and (min-width: 1192px) and (max-width: 1423px) {
-        padding-left: calc(-4.8px + 20vw);
+        padding-left: calc(-4.8px + 20vw + 20px);
       }
 
       @media screen and (min-width: 1424px) and (max-width: 1727px) {
-        padding-left: calc(-5.33333px + 16.66667vw);
+        padding-left: calc(-5.33333px + 16.66667vw + 20px);
       }
 
       @media screen and (min-width: 1728px) {
-        padding-left: 282.66667px;
+        padding-left: 302.66667px;
       }
     }
   }

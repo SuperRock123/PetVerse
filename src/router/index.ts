@@ -27,12 +27,14 @@ export const routes = [
         path: "/followTrend",
         component: () => import("@/pages/follow-trend/follow-trend.vue"),
         name: "followTrend", // 用于 keep-alive, 必须与SFC自动推导或者显示声明的组件name一致
+        meta: { requiresAuth: true }
       },
       {
         path: "/notice",
         component: () => import("@/pages/message/index.vue"),
         name: "notice", // 用于 keep-alive, 必须与SFC自动推导或者显示声明的组件name一致
         redirect: "/message",
+        meta: { requiresAuth: true },
         children: [
           {
             path: "/message",
@@ -66,6 +68,7 @@ export const routes = [
         component: () => import("@/pages/user/index.vue"),
         name: "user", // 用于 keep-alive, 必须与SFC自动推导或者显示声明的组件name一致
         redirect: "/note",
+        meta: { requiresAuth: true },
         children: [
           {
             path: "/note",
@@ -88,6 +91,175 @@ export const routes = [
         path: "/push",
         component: () => import("@/pages/push/index.vue"),
         name: "push", // 用于 keep-alive, 必须与SFC自动推导或者显示声明的组件name一致
+        meta: { requiresAuth: true }
+      },
+      // 用户模块
+      {
+        path: "/user/profile",
+        component: () => import("@/pages/user/profile.vue"),
+        name: "userProfile",
+        meta: { requiresAuth: true }
+      },
+      {
+        path: "/user/tags",
+        component: () => import("@/pages/user/tags.vue"),
+        name: "userTags",
+        meta: { requiresAuth: true }
+      },
+      // 宠物管理模块
+      {
+        path: "/pets",
+        component: () => import("@/pages/pets/index.vue"),
+        name: "pets",
+        redirect: "/pets/list",
+        meta: { requiresAuth: true },
+        children: [
+          {
+            path: "/pets/list",
+            component: () => import("@/pages/pets/list.vue"),
+            name: "petsList",
+          },
+          {
+            path: "/pets/add",
+            component: () => import("@/pages/pets/add.vue"),
+            name: "petsAdd",
+          },
+          {
+            path: "/pets/vaccine",
+            component: () => import("@/pages/pets/vaccine.vue"),
+            name: "petsVaccine",
+          },
+          {
+            path: "/pets/album",
+            component: () => import("@/pages/pets/album.vue"),
+            name: "petsAlbum",
+          },
+        ],
+      },
+      // 社区动态模块
+      {
+        path: "/social",
+        component: () => import("@/pages/social/index.vue"),
+        name: "social",
+        redirect: "/social/posts",
+        meta: { requiresAuth: true },
+        children: [
+          {
+            path: "/social/posts",
+            component: () => import("@/pages/social/posts.vue"),
+            name: "socialPosts",
+          },
+          {
+            path: "/social/publish",
+            component: () => import("@/pages/social/publish.vue"),
+            name: "socialPublish",
+          },
+          {
+            path: "/social/recommend",
+            component: () => import("@/pages/social/recommend.vue"),
+            name: "socialRecommend",
+          },
+        ],
+      },
+      // AI模块
+      {
+        path: "/ai",
+        component: () => import("@/pages/ai/index.vue"),
+        name: "ai",
+        redirect: "/ai/qa",
+        meta: { requiresAuth: true },
+        children: [
+          {
+            path: "/ai/qa",
+            component: () => import("@/pages/ai/qa.vue"),
+            name: "aiQa",
+          },
+          {
+            path: "/ai/avatar",
+            component: () => import("@/pages/ai/avatar.vue"),
+            name: "aiAvatar",
+          },
+          {
+            path: "/ai/emoji",
+            component: () => import("@/pages/ai/emoji.vue"),
+            name: "aiEmoji",
+          },
+        ],
+      },
+      // Pettag模块
+      {
+        path: "/pettag",
+        component: () => import("@/pages/pettag/index.vue"),
+        name: "pettag",
+        redirect: "/pettag/list",
+        meta: { requiresAuth: true },
+        children: [
+          {
+            path: "/pettag/list",
+            component: () => import("@/pages/pettag/list.vue"),
+            name: "pettagList",
+          },
+          {
+            path: "/pettag/location",
+            component: () => import("@/pages/pettag/location.vue"),
+            name: "pettagLocation",
+          },
+          {
+            path: "/pettag/status",
+            component: () => import("@/pages/pettag/status.vue"),
+            name: "pettagStatus",
+          },
+        ],
+      },
+      // 地图模块
+      {
+        path: "/map",
+        component: () => import("@/pages/map/index.vue"),
+        name: "map",
+        redirect: "/map/pet-location",
+        meta: { requiresAuth: true },
+        children: [
+          {
+            path: "/map/pet-location",
+            component: () => import("@/pages/map/pet-location.vue"),
+            name: "mapPetLocation",
+          },
+          {
+            path: "/map/nearby",
+            component: () => import("@/pages/map/nearby.vue"),
+            name: "mapNearby",
+          },
+        ],
+      },
+      // 管理后台模块
+      {
+        path: "/admin",
+        component: () => import("@/pages/admin/index.vue"),
+        name: "admin",
+        redirect: "/admin/users",
+        meta: { requiresAuth: true },
+        children: [
+          {
+            path: "/admin/users",
+            component: () => import("@/pages/admin/users.vue"),
+            name: "adminUsers",
+          },
+          {
+            path: "/admin/content",
+            component: () => import("@/pages/admin/content.vue"),
+            name: "adminContent",
+          },
+          {
+            path: "/admin/reports",
+            component: () => import("@/pages/admin/reports.vue"),
+            name: "adminReports",
+          },
+          {
+            path: "/admin/dashboard",
+            component: () => import("@/pages/admin/dashboard.vue"),
+            name: "adminDashboard",
+          },
+        ],
       },
     ],
   },
@@ -102,7 +274,18 @@ const router = createRouter({
   history: createWebHistory(),
   routes,
 });
+
+// 路由守卫
 router.beforeEach((to, from, next) => {
-  next();
+  // 检查是否需要登录
+  const requiresAuth = to.meta.requiresAuth || false;
+  const isLoggedIn = !!localStorage.getItem('token');
+  
+  if (requiresAuth && !isLoggedIn) {
+    // 未登录，重定向到登录页
+    next({ path: '/login' });
+  } else {
+    next();
+  }
 });
 export default router;

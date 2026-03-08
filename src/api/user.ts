@@ -1,32 +1,91 @@
 import request from "@/utils/request";
 
-export const postData = (data: any) => {
-  return request<any>({
-    url: "/user/login", // mock接口
+// 用户登录
+export const login = (data: {
+  usernameOrEmail: string;
+  password: string;
+}) => {
+  return request({
+    url: "/user/login",
     method: "post",
     data,
   });
 };
 
-export const getData = (queryParams:any) => {
-  return request<any>({
-    url: "/user/info", // mock接口
+// 获取用户列表
+export const getUserList = (params: {
+  page?: number;
+  pageSize?: number;
+  keyword?: string;
+  status?: number;
+}) => {
+  return request({
+    url: "/user",
     method: "get",
-    params:queryParams
+    params,
   });
 };
 
+// 获取用户详情
+export const getUserById = (id: number) => {
+  return request({
+    url: `/user/${id}`,
+    method: "get",
+  });
+};
 
-export function importFile(deptId: number,file: File) {
-    const formData = new FormData();
-    formData.append("file", file);
-    return request({
-      url: "/api/v1/users/_import",
-      method: "post",
-      params: { deptId: deptId },
-      data: formData,
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
-}
+// 创建用户
+export const createUser = (data: {
+  username: string;
+  nickname: string;
+  phone: string;
+  email: string;
+  password: string;
+  avatarUrl?: string;
+  bio?: string;
+}) => {
+  return request({
+    url: "/user",
+    method: "post",
+    data,
+  });
+};
+
+// 更新用户信息
+export const updateUser = (id: number, data: {
+  nickname?: string;
+  phone?: string;
+  email?: string;
+  avatarUrl?: string;
+  bio?: string;
+}) => {
+  return request({
+    url: `/user/${id}`,
+    method: "put",
+    data,
+  });
+};
+
+// 删除用户
+export const deleteUser = (id: number) => {
+  return request({
+    url: `/user/${id}`,
+    method: "delete",
+  });
+};
+
+// 检查用户名是否可用
+export const checkUsername = (username: string) => {
+  return request({
+    url: `/user/check-username/${username}`,
+    method: "get",
+  });
+};
+
+// 检查邮箱是否可用
+export const checkEmail = (email: string) => {
+  return request({
+    url: `/user/check-email/${email}`,
+    method: "get",
+  });
+};
