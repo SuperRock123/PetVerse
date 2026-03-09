@@ -14,8 +14,10 @@ service.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     // 从localStorage获取token
     const token = localStorage.getItem('token');
+    console.log('Token:', token);
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+      console.log('Authorization header:', config.headers.Authorization);
     }
     return config;
   },
