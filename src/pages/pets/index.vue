@@ -3,7 +3,6 @@
     <h1>宠物管理</h1>
     <div class="pets-nav">
       <router-link to="/pets/list" class="nav-item">宠物列表</router-link>
-      <router-link to="/pets/add" class="nav-item">添加宠物</router-link>
       <router-link to="/pets/vaccine" class="nav-item">疫苗管理</router-link>
       <router-link to="/pets/album" class="nav-item">相册管理</router-link>
     </div>

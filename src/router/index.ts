@@ -120,11 +120,6 @@ export const routes = [
             name: "petsList",
           },
           {
-            path: "/pets/add",
-            component: () => import("@/pages/pets/add.vue"),
-            name: "petsAdd",
-          },
-          {
             path: "/pets/vaccine",
             component: () => import("@/pages/pets/vaccine.vue"),
             name: "petsVaccine",

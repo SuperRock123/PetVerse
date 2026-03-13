@@ -8,7 +8,7 @@ export const getPetList = (params: {
   SortOrder?: string;
 }) => {
   return request({
-    url: "/pet",
+    url: "/Pet",
     method: "get",
     params,
   });
@@ -17,7 +17,7 @@ export const getPetList = (params: {
 // 根据ID获取宠物详情
 export const getPetById = (id: number) => {
   return request({
-    url: `/pet/${id}`,
+    url: `/Pet/${id}`,
     method: "get",
   });
 };
@@ -25,7 +25,7 @@ export const getPetById = (id: number) => {
 // 根据用户ID获取宠物列表
 export const getPetsByUserId = (userId: number) => {
   return request({
-    url: `/pet/user/${userId}`,
+    url: `/Pet/user/${userId}`,
     method: "get",
   });
 };
@@ -43,7 +43,7 @@ export const createPet = (data: {
   PetTagId?: string;
 }) => {
   return request({
-    url: "/pet",
+    url: "/Pet",
     method: "post",
     data,
   });
@@ -61,7 +61,7 @@ export const updatePet = (id: number, data: {
   PetTagId?: string;
 }) => {
   return request({
-    url: `/pet/${id}`,
+    url: `/Pet/${id}`,
     method: "put",
     data,
   });
@@ -70,7 +70,7 @@ export const updatePet = (id: number, data: {
 // 删除宠物（软删除）
 export const deletePet = (id: number) => {
   return request({
-    url: `/pet/${id}`,
+    url: `/Pet/${id}`,
     method: "delete",
   });
 };
@@ -78,7 +78,7 @@ export const deletePet = (id: number) => {
 // 检查宠物是否存在
 export const checkPetExists = (id: number) => {
   return request({
-    url: `/pet/${id}/exists`,
+    url: `/Pet/${id}/exists`,
     method: "get",
   });
 };
@@ -86,7 +86,7 @@ export const checkPetExists = (id: number) => {
 // 验证宠物归属关系
 export const verifyPetBelongsToUser = (petId: number, userId: number) => {
   return request({
-    url: `/pet/${petId}/belongs-to/${userId}`,
+    url: `/Pet/${petId}/belongs-to/${userId}`,
     method: "get",
   });
 };

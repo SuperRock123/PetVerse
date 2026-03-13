@@ -32,7 +32,7 @@
             >
           </li>
           <li>
-            <Pets style="width: 1em; height: 1em; margin-right: 8px" /><span class="channel" @click="toPets()">
+            <Avatar style="width: 1em; height: 1em; margin-right: 8px" /><span class="channel" @click="toPets()">
               宠物管理</span
             >
           </li>
@@ -163,7 +163,7 @@ import {
   ArrowRight,
   More,
   CirclePlus,
-  // Pets,
+  Avatar,
   Cpu,
   Location,
   Key,
