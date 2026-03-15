@@ -1,20 +1,56 @@
 import request from "@/utils/request";
 
-// 获取宠物列表（分页）
-export const getPetList = (params: {
-  Page: number;
-  PageSize: number;
-  SortBy?: string;
-  SortOrder?: string;
-}) => {
+export interface PetQueryParams {
+  page?: number;
+  pageSize?: number;
+  userId?: number;
+  keyword?: string;
+  status?: number;
+  sortBy?: string;
+  sortOrder?: string;
+}
+
+export interface PetResponse {
+  id: number;
+  userId: number;
+  name: string;
+  breed: string;
+  gender: number;
+  birthday: string;
+  weightKg: number;
+  healthStatus: string;
+  avatarUrl?: string;
+  petTagId?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PetListResult {
+  pets: PetResponse[];
+  pagination: {
+    page: number;
+    pageSize: number;
+    totalCount: number;
+    totalPages: number;
+  };
+}
+
+export const getPetList = (params: PetQueryParams = {}) => {
   return request({
     url: "/Pet",
     method: "get",
-    params,
+    params: {
+      Page: params.page || 1,
+      PageSize: params.pageSize || 10,
+      UserId: params.userId,
+      Keyword: params.keyword,
+      Status: params.status,
+      SortBy: params.sortBy,
+      SortOrder: params.sortOrder,
+    },
   });
 };
 
-// 根据ID获取宠物详情
 export const getPetById = (id: number) => {
   return request({
     url: `/Pet/${id}`,
@@ -22,7 +58,6 @@ export const getPetById = (id: number) => {
   });
 };
 
-// 根据用户ID获取宠物列表
 export const getPetsByUserId = (userId: number) => {
   return request({
     url: `/Pet/user/${userId}`,
@@ -30,17 +65,16 @@ export const getPetsByUserId = (userId: number) => {
   });
 };
 
-// 创建宠物
 export const createPet = (data: {
-  UserId: number;
-  Name: string;
-  Breed: string;
-  Gender: number;
-  Birthday: string;
-  WeightKg: number;
-  HealthStatus: string;
-  Avatar?: string;
-  PetTagId?: string;
+  userId: number;
+  name: string;
+  breed: string;
+  gender: number;
+  birthday: string;
+  weightKg: number;
+  healthStatus: string;
+  avatarUrl?: string;
+  petTagId?: string;
 }) => {
   return request({
     url: "/Pet",
@@ -49,16 +83,15 @@ export const createPet = (data: {
   });
 };
 
-// 更新宠物信息
 export const updatePet = (id: number, data: {
-  Name?: string;
-  Breed?: string;
-  Gender?: number;
-  Birthday?: string;
-  WeightKg?: number;
-  HealthStatus?: string;
-  Avatar?: string;
-  PetTagId?: string;
+  name?: string;
+  breed?: string;
+  gender?: number;
+  birthday?: string;
+  weightKg?: number;
+  healthStatus?: string;
+  avatarUrl?: string;
+  petTagId?: string;
 }) => {
   return request({
     url: `/Pet/${id}`,
@@ -67,7 +100,6 @@ export const updatePet = (id: number, data: {
   });
 };
 
-// 删除宠物（软删除）
 export const deletePet = (id: number) => {
   return request({
     url: `/Pet/${id}`,
@@ -75,7 +107,6 @@ export const deletePet = (id: number) => {
   });
 };
 
-// 检查宠物是否存在
 export const checkPetExists = (id: number) => {
   return request({
     url: `/Pet/${id}/exists`,
@@ -83,7 +114,6 @@ export const checkPetExists = (id: number) => {
   });
 };
 
-// 验证宠物归属关系
 export const verifyPetBelongsToUser = (petId: number, userId: number) => {
   return request({
     url: `/Pet/${petId}/belongs-to/${userId}`,

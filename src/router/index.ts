@@ -136,25 +136,7 @@ export const routes = [
         path: "/social",
         component: () => import("@/pages/social/index.vue"),
         name: "social",
-        redirect: "/social/posts",
-        meta: { requiresAuth: true },
-        children: [
-          {
-            path: "/social/posts",
-            component: () => import("@/pages/social/posts.vue"),
-            name: "socialPosts",
-          },
-          {
-            path: "/social/publish",
-            component: () => import("@/pages/social/publish.vue"),
-            name: "socialPublish",
-          },
-          {
-            path: "/social/recommend",
-            component: () => import("@/pages/social/recommend.vue"),
-            name: "socialRecommend",
-          },
-        ],
+        meta: { requiresAuth: true }
       },
       // AI模块
       {

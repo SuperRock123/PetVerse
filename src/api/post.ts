@@ -1,156 +1,222 @@
 import request from "@/utils/request";
 
-// 获取帖子列表（分页）
-export const getPostList = (params: {
-  Page: number;
-  PageSize: number;
-  SortBy?: string;
-  SortOrder?: string;
-}) => {
+export interface PostQueryParams {
+  page?: number;
+  pageSize?: number;
+  userId?: number;
+  petId?: number;
+  keyword?: string;
+  visibility?: number;
+  status?: number;
+  fromDate?: string;
+  toDate?: string;
+}
+
+export interface PostResponse {
+  id: number;
+  userId: number;
+  petId: number | null;
+  content: string;
+  mediaUrls: string[];
+  location: string;
+  likesCount: number;
+  commentsCount: number;
+  viewCount: number;
+  mediaCount: number | null;
+  visibility: number;
+  status: number;
+  createdAt: string;
+  updatedAt: string;
+  publishedAt: string | null;
+  userName: string;
+  userAvatar: string | null;
+  nickname: string | null;
+  petName: string | null;
+  petAvatar: string | null;
+  isLiked?: boolean;
+}
+
+export interface PaginationInfo {
+  page: number;
+  pageSize: number;
+  totalCount: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+}
+
+export interface PostListResult {
+  posts: PostResponse[];
+  pagination: PaginationInfo;
+}
+
+export interface CreatePostRequest {
+  userId: number;
+  petId?: number;
+  content: string;
+  location?: string;
+  visibility: number;
+  mediaIds?: number[];
+}
+
+export interface UpdatePostRequest {
+  content?: string;
+  location?: string;
+  visibility?: number;
+}
+
+export interface CreateCommentRequest {
+  postId: number;
+  userId: number;
+  parentId?: number;
+  content: string;
+}
+
+export interface LikeRequest {
+  targetType: string;
+  targetId: number;
+  userId: number;
+}
+
+export interface UploadPostRequest {
+  userId: number;
+  petId?: number;
+  content: string;
+  location?: string;
+  visibility: number;
+  files: File[];
+}
+
+export const getPostList = (params: PostQueryParams = {}) => {
   return request({
-    url: "/post",
+    url: "/Post",
     method: "get",
-    params,
+    params: {
+      Page: params.page || 1,
+      PageSize: params.pageSize || 10,
+      UserId: params.userId,
+      PetId: params.petId,
+      Keyword: params.keyword,
+      Visibility: params.visibility,
+      Status: params.status,
+      FromDate: params.fromDate,
+      ToDate: params.toDate,
+    },
   });
 };
 
-// 根据ID获取帖子详情
 export const getPostById = (id: number, currentUserId?: number) => {
   return request({
-    url: `/post/${id}`,
+    url: `/Post/${id}`,
     method: "get",
     params: currentUserId ? { currentUserId } : {},
   });
 };
 
-// 根据用户ID获取帖子列表
-export const getPostsByUserId = (userId: number, limit?: number) => {
+export const getPostsByUserId = (userId: number, limit: number = 50) => {
   return request({
-    url: `/post/user/${userId}`,
+    url: `/Post/user/${userId}`,
     method: "get",
-    params: limit ? { limit } : {},
+    params: { limit },
   });
 };
 
-// 根据宠物ID获取帖子列表
-export const getPostsByPetId = (petId: number, limit?: number) => {
+export const getPostsByPetId = (petId: number, limit: number = 50) => {
   return request({
-    url: `/post/pet/${petId}`,
+    url: `/Post/pet/${petId}`,
     method: "get",
-    params: limit ? { limit } : {},
+    params: { limit },
   });
 };
 
-// 创建帖子
-export const createPost = (data: {
-  UserId: number;
-  PetId: number;
-  Content: string;
-  Location?: string;
-  Visibility: string;
-}) => {
+export const createPost = (data: CreatePostRequest) => {
   return request({
-    url: "/post",
+    url: "/Post",
     method: "post",
-    data,
+    data: {
+      UserId: data.userId,
+      PetId: data.petId,
+      Content: data.content,
+      Location: data.location,
+      Visibility: data.visibility,
+      MediaIds: data.mediaIds
+    }
   });
 };
 
-// 更新帖子信息
-export const updatePost = (id: number, data: {
-  Content?: string;
-  Location?: string;
-  Visibility?: string;
-}) => {
+export const updatePost = (id: number, data: UpdatePostRequest) => {
   return request({
-    url: `/post/${id}`,
+    url: `/Post/${id}`,
     method: "put",
     data,
   });
 };
 
-// 删除帖子（软删除）
 export const deletePost = (id: number) => {
   return request({
-    url: `/post/${id}`,
+    url: `/Post/${id}`,
     method: "delete",
   });
 };
 
-// 创建评论
-export const createComment = (data: {
-  PostId: number;
-  UserId: number;
-  Content: string;
-}) => {
+export const createComment = (data: CreateCommentRequest) => {
   return request({
-    url: "/post/comment",
+    url: "/Post/comment",
     method: "post",
     data,
   });
 };
 
-// 点赞/取消点赞
-export const likePost = (data: {
-  PostId: number;
-  UserId: number;
-}) => {
+export const toggleLike = (data: LikeRequest) => {
   return request({
-    url: "/post/like",
+    url: "/Post/like",
     method: "post",
     data,
   });
 };
 
-// 检查帖子是否存在
 export const checkPostExists = (id: number) => {
   return request({
-    url: `/post/${id}/exists`,
+    url: `/Post/${id}/exists`,
     method: "get",
   });
 };
 
-// 验证帖子归属关系
 export const verifyPostBelongsToUser = (postId: number, userId: number) => {
   return request({
-    url: `/post/${postId}/belongs-to/${userId}`,
+    url: `/Post/${postId}/belongs-to/${userId}`,
     method: "get",
   });
 };
 
-// 上传完整post信息
-export const uploadPost = (data: {
-  UserId: number;
-  PetId: number;
-  Content: string;
-  Location: string;
-  Visibility: string;
-  Files: File[];
-}) => {
+export const uploadPost = (data: UploadPostRequest) => {
   const formData = new FormData();
-  formData.append("UserId", data.UserId.toString());
-  formData.append("PetId", data.PetId.toString());
-  formData.append("Content", data.Content);
-  formData.append("Location", data.Location);
-  formData.append("Visibility", data.Visibility);
-  data.Files.forEach((file) => {
+  formData.append("UserId", data.userId.toString());
+  if (data.petId) {
+    formData.append("PetId", data.petId.toString());
+  }
+  formData.append("Content", data.content);
+  if (data.location) {
+    formData.append("Location", data.location);
+  }
+  formData.append("Visibility", data.visibility.toString());
+  data.files.forEach((file) => {
     formData.append("Files", file);
   });
   return request({
-    url: "/post/upload",
+    url: "/Post/upload",
     method: "post",
     data: formData,
     headers: {
-      "Content-Type": "multipart/form-data"
-    }
+      "Content-Type": "multipart/form-data",
+    },
   });
 };
 
-// 获取推荐帖子列表
-export const getRecommendedPosts = (limit?: number) => {
+export const getRecommendedPosts = (limit: number = 20) => {
   return request({
-    url: "/post/recommended",
+    url: "/Post/recommended",
     method: "get",
-    params: limit ? { limit } : {},
+    params: { limit },
   });
 };
