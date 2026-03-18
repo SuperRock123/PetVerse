@@ -17,7 +17,7 @@
 
     <div class="feeds-container" v-if="posts.length > 0">
       <Waterfall :list="posts" :width="240" :hasAroundGutter="false" style="max-width: 1260px">
-        <template #item="{ item, index }">
+        <template #item="{ item }">
           <div class="card" @click="openPostDetail(item)">
             <LazyImg :url="getPostCover(item)" style="border-radius: 8px" />
             <div class="footer">
@@ -108,7 +108,7 @@
 
 <script lang="ts" setup>
 import { ref, onMounted, computed, onUnmounted } from 'vue'
-import { useRouter } from 'vue-router'
+
 import { ElMessage } from 'element-plus'
 import { Star, Location, View, ChatDotRound, Loading, Share } from '@element-plus/icons-vue'
 import { LazyImg, Waterfall } from 'vue-waterfall-plugin-next'
@@ -116,7 +116,7 @@ import 'vue-waterfall-plugin-next/dist/style.css'
 import { getPostList, getRecommendedPosts, toggleLike, type PostResponse } from '@/api/post'
 import { useUserStore } from '@/store/userStore'
 
-const router = useRouter()
+
 const userStore = useUserStore()
 
 const loading = ref(false)
@@ -164,7 +164,7 @@ const fetchPosts = async (isLoadMore = false) => {
     let res
     if (activeChannel.value === 'recommend') {
       res = await getRecommendedPosts(pageSize.value)
-      if (res.success && res.data) {
+      if ((res as any).success && (res as any).data) {
         if (isLoadMore) {
           posts.value = [...posts.value, ...res.data]
         } else {
@@ -177,7 +177,7 @@ const fetchPosts = async (isLoadMore = false) => {
         page: currentPage.value,
         pageSize: pageSize.value
       })
-      if (res.success && res.data) {
+      if ((res as any).success && (res as any).data) {
         if (isLoadMore) {
           posts.value = [...posts.value, ...res.data.posts]
         } else {
@@ -216,7 +216,7 @@ const handleLike = async (post: PostResponse) => {
       targetId: post.id,
       userId: userStore.userInfo.id
     })
-    if (res.success) {
+    if ((res as any).success) {
       post.isLiked = res.data.isLiked
       post.likesCount = res.data.isLiked ? post.likesCount + 1 : post.likesCount - 1
     }

@@ -54,7 +54,7 @@
 import { ref, reactive, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { createPet, updatePet, getPetById } from '@/api/pet';
-import { uploadMedia, deleteMedia } from '@/api/media';
+import { uploadMedia } from '@/api/media';
 import { ElMessage } from 'element-plus';
 import { Plus, Delete } from '@element-plus/icons-vue';
 
@@ -161,15 +161,15 @@ const submitForm = async () => {
         const userId = Number(JSON.parse(localStorage.getItem('userInfo') || '{}').id || 0);
         // 构建提交数据，确保字段名与 API 要求一致
         const formData = {
-          UserId: userId, // 从 userStorage 获取
-          Name: petForm.name,
-          Breed: petForm.breed,
-          Gender: petForm.gender,
-          Birthday: petForm.birthday ? new Date(petForm.birthday).toISOString().split('T')[0] : '',
-          WeightKg: petForm.weightKg,
-          HealthStatus: petForm.healthStatus,
-          Avatar: petForm.avatar, // 使用正确的字段名 Avatar
-          PetTagId: petForm.petTagId
+          userId: userId, // 从 userStorage 获取
+          name: petForm.name,
+          breed: petForm.breed,
+          gender: petForm.gender,
+          birthday: petForm.birthday ? new Date(petForm.birthday).toISOString().split('T')[0] : '',
+          weightKg: petForm.weightKg,
+          healthStatus: petForm.healthStatus,
+          avatarUrl: petForm.avatar,
+          petTagId: petForm.petTagId
         };
 
         console.log('提交的数据:', formData);

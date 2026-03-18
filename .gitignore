@@ -24,3 +24,7 @@ hs_err_pid*
 node_modules
 .npm-cache
 yarn.lock
+dist
+pnpm-lock.yaml
+yarn.lock
+yarn.lock

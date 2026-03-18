@@ -36,7 +36,7 @@ const currentThemeText = computed(() => {
     dark: '暗色主题',
     pet: '宠物主题'
   };
-  return themes[themeStore.currentTheme];
+  return themes[themeStore.currentTheme.value];
 });
 
 const handleThemeChange = (theme: ThemeType) => {

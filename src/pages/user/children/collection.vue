@@ -1,7 +1,7 @@
 <template>
   <div class="feeds-container">
     <Waterfall :list="list" :width="220" :hasAroundGutter="false" style="max-width: 1260px">
-      <template #item="{ item, url, index }">
+      <template #item="{ url }">
         <div class="card">
           <LazyImg :url="url" style="border-radius: 8px" />
           <div class="footer">

@@ -354,15 +354,15 @@ const submitForm = async () => {
       try {
         const userId = Number(JSON.parse(localStorage.getItem('userInfo') || '{}').id || 1);
         const formData = {
-          UserId: userId,
-          Name: petForm.name,
-          Breed: petForm.breed,
-          Gender: petForm.gender,
-          Birthday: petForm.birthday,
-          WeightKg: petForm.weightKg,
-          HealthStatus: petForm.healthStatus,
-          AvatarUrl: petForm.avatar,
-          PettagId: petForm.petTagId
+          userId: userId,
+          name: petForm.name,
+          breed: petForm.breed,
+          gender: petForm.gender,
+          birthday: petForm.birthday,
+          weightKg: petForm.weightKg,
+          healthStatus: petForm.healthStatus,
+          avatarUrl: petForm.avatar,
+          petTagId: petForm.petTagId
         };
 
         if (isEdit.value && petId.value) {
@@ -409,8 +409,8 @@ const fetchPets = async () => {
   loading.value = true;
   try {
     const response = await getPetList({
-      Page: currentPage.value,
-      PageSize: pageSize.value
+      page: currentPage.value,
+      pageSize: pageSize.value
     });
     petsData.value = response.data.pets || [];
     total.value = response.data.pagination?.totalCount || 0;

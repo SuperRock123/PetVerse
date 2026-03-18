@@ -21,7 +21,7 @@
           <form @submit.prevent="handleSubmit">
             <template v-if="!isLoginMode">
               <label class="input-field"
-                ><input v-model="formData.username" placeholder="输入用户名" type="text" name="username" autofocus="" />
+                ><input v-model="formData.username" placeholder="输入用户名" type="text" name="username" :autofocus="true" />
               </label>
               <div style="height: 16px"></div>
               <label class="input-field"
@@ -39,7 +39,7 @@
             </template>
             <template v-else>
               <label class="input-field"
-                ><input v-model="formData.usernameOrEmail" placeholder="输入用户名或邮箱" type="text" name="usernameOrEmail" autofocus="" />
+                ><input v-model="formData.usernameOrEmail" placeholder="输入用户名或邮箱" type="text" name="usernameOrEmail" :autofocus="true" />
               </label>
               <div style="height: 16px"></div>
             </template>

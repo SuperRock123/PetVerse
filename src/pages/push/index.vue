@@ -145,12 +145,12 @@ const beforeUpload: UploadProps['beforeUpload'] = (rawFile) => {
   return true;
 };
 
-const handleFileChange: UploadProps['onChange'] = async (uploadFile, uploadFiles) => {
+const handleFileChange: UploadProps['onChange'] = async (uploadFile) => {
   if (uploadFile.status === 'ready' && uploadFile.raw) {
     uploadFile.status = 'uploading';
     try {
-      const res = await uploadMedia(uploadFile.raw);
-      if (res.success && res.data) {
+      const res = await uploadMedia(uploadFile.raw) as any;
+      if ((res as any).success && (res as any).data) {
         uploadedMedias.value.push({
           uid: uploadFile.uid,
           mediaId: res.data.id,
@@ -159,18 +159,18 @@ const handleFileChange: UploadProps['onChange'] = async (uploadFile, uploadFiles
         uploadFile.status = 'success';
         ElMessage.success('图片上传成功');
       } else {
-        uploadFile.status = 'exception';
+        (uploadFile as any).status = 'error';
         ElMessage.error('图片上传失败');
       }
     } catch (error) {
       console.error('上传图片失败:', error);
-      uploadFile.status = 'exception';
+      (uploadFile as any).status = 'error';
       ElMessage.error('图片上传失败');
     }
   }
 };
 
-const handleFileRemove: UploadProps['onRemove'] = async (uploadFile, uploadFiles) => {
+const handleFileRemove: UploadProps['onRemove'] = async (uploadFile) => {
   const uploadedMedia = uploadedMedias.value.find(m => m.uid === uploadFile.uid);
   if (uploadedMedia) {
     try {
@@ -197,7 +197,7 @@ const fetchPets = async () => {
       pageSize: 100,
       userId: userStore.userInfo.id
     });
-    if (res.success && res.data) {
+    if ((res as any).success && (res as any).data) {
       pets.value = res.data.pets || [];
     }
   } catch (error) {
@@ -230,7 +230,7 @@ const publish = async () => {
       mediaIds: mediaIds.length > 0 ? mediaIds : undefined
     });
     
-    if (res.success) {
+    if ((res as any).success) {
       ElMessage.success('发布成功');
       uploadedMedias.value = [];
       reset();

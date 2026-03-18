@@ -17,7 +17,7 @@ export const uploadMedia = (file: File) => {
 // 批量上传媒体文件
 export const batchUploadMedia = (files: File[]) => {
   const formData = new FormData();
-  files.forEach((file, index) => {
+  files.forEach((file) => {
     formData.append("Files", file);
   });
   return request({

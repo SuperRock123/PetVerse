@@ -153,15 +153,11 @@
 <script lang="ts" setup>
 import {
   Search,
-  Sunny,
-  Moon,
   Close,
   House,
   Star,
   Bell,
   User,
-  ArrowRight,
-  More,
   CirclePlus,
   Avatar,
   Cpu,
