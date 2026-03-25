@@ -200,7 +200,9 @@ a {
     display: flex;
     position: relative;
     width: 800px;
-    height: 480px;
+    min-height: 480px;
+    max-height: 90vh;
+    overflow-y: auto;
     background: #fff;
     border-radius: 16px;
     box-shadow:

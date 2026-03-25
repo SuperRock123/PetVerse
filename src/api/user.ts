@@ -1,10 +1,7 @@
 import request from "@/utils/request";
 
 // 用户登录
-export const login = (data: {
-  Email: string;
-  Password: string;
-}) => {
+export const login = (data: { usernameOrEmail: string; password: string }) => {
   return request({
     url: "/user/login",
     method: "post",
@@ -13,12 +10,7 @@ export const login = (data: {
 };
 
 // 获取用户列表（分页）
-export const getUserList = (params: {
-  Page: number;
-  PageSize: number;
-  SortBy?: string;
-  SortOrder?: string;
-}) => {
+export const getUserList = (params: { Page: number; PageSize: number; SortBy?: string; SortOrder?: string }) => {
   return request({
     url: "/user",
     method: "get",
@@ -34,46 +26,34 @@ export const getUserById = (id: number) => {
   });
 };
 
-// 创建用户
-export const createUser = (data: {
-  Username: string;
-  Email: string;
-  Password: string;
-  Phone: string;
-  Avatar?: string;
-  Bio?: string;
-}) => {
-  return request({
-    url: "/user",
-    method: "post",
-    data,
-  });
-};
-
 // 用户注册
-export const register = (data: {
-  Username: string;
-  Email: string;
-  Password: string;
-  Phone: string;
-  Avatar?: string;
-  Bio?: string;
+export const createUser = (data: {
+  username: string;
+  nickname: string;
+  phone: string;
+  email: string;
+  password: string;
+  avatarUrl?: string;
+  bio?: string;
 }) => {
   return request({
-    url: "/user/register",
+    url: "/User/register",
     method: "post",
     data,
   });
 };
 
 // 更新用户信息
-export const updateUser = (id: number, data: {
-  Username?: string;
-  Email?: string;
-  Phone?: string;
-  Avatar?: string;
-  Bio?: string;
-}) => {
+export const updateUser = (
+  id: number,
+  data: {
+    Username?: string;
+    Email?: string;
+    Phone?: string;
+    Avatar?: string;
+    Bio?: string;
+  }
+) => {
   return request({
     url: `/user/${id}`,
     method: "put",

@@ -60,7 +60,7 @@
         <div class="post-detail-media" v-if="currentPost.mediaUrls?.length > 0">
           <el-carousel :interval="5000" arrow="always" height="400px">
             <el-carousel-item v-for="(url, index) in currentPost.mediaUrls" :key="index">
-              <el-image :src="url" fit="contain" style="width: 100%; height: 100%;" />
+              <el-image :src="url" fit="contain" style="width: 100%; height: 100%;" :preview-src-list="currentPost.mediaUrls" />
             </el-carousel-item>
           </el-carousel>
         </div>
@@ -91,7 +91,7 @@
               <el-icon><Star /></el-icon>
               {{ currentPost.isLiked ? '取消点赞' : '点赞' }}
             </el-button>
-            <el-button>
+            <el-button @click="focusCommentInput">
               <el-icon><ChatDotRound /></el-icon>
               评论
             </el-button>
@@ -100,6 +100,79 @@
               分享
             </el-button>
           </div>
+          
+          <el-divider>评论 ({{ currentPost.commentsCount || 0 }})</el-divider>
+          
+          <div class="comment-section">
+            <div class="comment-input-wrapper">
+              <div class="reply-indicator" v-if="replyingTo">
+                <span>回复 @{{ replyingTo.nickname || replyingTo.userName }}</span>
+                <el-icon class="cancel-reply" @click="cancelReply"><Close /></el-icon>
+              </div>
+              <el-input
+                ref="commentInputRef"
+                v-model="newComment"
+                type="textarea"
+                :rows="2"
+                :placeholder="replyingTo ? `回复 @${replyingTo.nickname || replyingTo.userName}...` : '写下你的评论...'"
+                maxlength="500"
+                show-word-limit
+              />
+              <el-button type="primary" @click="submitComment" :loading="submittingComment" :disabled="!newComment.trim()">
+                发送
+              </el-button>
+            </div>
+            
+            <div class="comments-list" v-if="comments.length > 0">
+              <div class="comment-item" v-for="comment in comments" :key="comment.id">
+                <el-avatar :size="36" :src="comment.userAvatar || defaultAvatar">
+                  {{ comment.userName?.charAt(0)?.toUpperCase() }}
+                </el-avatar>
+                <div class="comment-content">
+                  <div class="comment-header">
+                    <span class="comment-username">{{ comment.nickname || comment.userName }}</span>
+                    <span class="comment-time">{{ formatTime(comment.createdAt) }}</span>
+                  </div>
+                  <p class="comment-text">{{ comment.content }}</p>
+                  <div class="comment-actions">
+                    <span class="action-btn" :class="{ 'liked': comment.isLiked }" @click="handleCommentLike(comment)">
+                      <el-icon><Star /></el-icon>
+                      {{ comment.likesCount || 0 }}
+                    </span>
+                    <span class="action-btn" @click="replyToComment(comment)">
+                      回复
+                    </span>
+                  </div>
+                  
+                  <div class="replies-list" v-if="comment.replies && comment.replies.length > 0">
+                    <div class="comment-item reply-item" v-for="reply in comment.replies" :key="reply.id">
+                      <el-avatar :size="28" :src="reply.userAvatar || defaultAvatar">
+                        {{ reply.userName?.charAt(0)?.toUpperCase() }}
+                      </el-avatar>
+                      <div class="comment-content">
+                        <div class="comment-header">
+                          <span class="comment-username">{{ reply.nickname || reply.userName }}</span>
+                          <span class="comment-time">{{ formatTime(reply.createdAt) }}</span>
+                        </div>
+                        <p class="comment-text">{{ reply.content }}</p>
+                        <div class="comment-actions">
+                          <span class="action-btn" :class="{ 'liked': reply.isLiked }" @click="handleCommentLike(reply)">
+                            <el-icon><Star /></el-icon>
+                            {{ reply.likesCount || 0 }}
+                          </span>
+                          <span class="action-btn" @click="replyToComment(reply)">
+                            回复
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <el-empty v-else-if="!loadingComments" description="暂无评论，快来抢沙发吧~" :image-size="80" />
+          </div>
         </div>
       </div>
     </el-dialog>
@@ -107,13 +180,13 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, computed, onUnmounted } from 'vue'
+import { ref, onMounted, computed, onUnmounted, nextTick } from 'vue'
 
 import { ElMessage } from 'element-plus'
-import { Star, Location, View, ChatDotRound, Loading, Share } from '@element-plus/icons-vue'
+import { Star, Location, View, ChatDotRound, Loading, Share, Close } from '@element-plus/icons-vue'
 import { LazyImg, Waterfall } from 'vue-waterfall-plugin-next'
 import 'vue-waterfall-plugin-next/dist/style.css'
-import { getPostList, getRecommendedPosts, toggleLike, type PostResponse } from '@/api/post'
+import { getPostList, getRecommendedPosts, toggleLike, createComment, getCommentsByPostId, type PostResponse, type CommentInfo } from '@/api/post'
 import { useUserStore } from '@/store/userStore'
 
 
@@ -128,6 +201,13 @@ const pageSize = ref(20)
 const activeChannel = ref('recommend')
 const showPostDetail = ref(false)
 const currentPost = ref<PostResponse | null>(null)
+
+const commentInputRef = ref()
+const newComment = ref('')
+const submittingComment = ref(false)
+const loadingComments = ref(false)
+const comments = ref<CommentInfo[]>([])
+const replyingTo = ref<CommentInfo | null>(null)
 
 const defaultAvatar = computed(() => 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png')
 
@@ -217,17 +297,138 @@ const handleLike = async (post: PostResponse) => {
       userId: userStore.userInfo.id
     })
     if ((res as any).success) {
-      post.isLiked = res.data.isLiked
-      post.likesCount = res.data.isLiked ? post.likesCount + 1 : post.likesCount - 1
+      post.isLiked = (res as any).data.isLiked
+      post.likesCount = (res as any).data.isLiked ? post.likesCount + 1 : post.likesCount - 1
     }
   } catch (error) {
     console.error('点赞操作失败:', error)
   }
 }
 
-const openPostDetail = (post: PostResponse) => {
+const openPostDetail = async (post: PostResponse) => {
   currentPost.value = post
   showPostDetail.value = true
+  comments.value = post.comments || []
+  if (comments.value.length === 0 && post.commentsCount > 0) {
+    await fetchComments()
+  }
+}
+
+const fetchComments = async () => {
+  if (!currentPost.value) return
+  loadingComments.value = true
+  try {
+    const currentUserId = userStore.userInfo?.id
+    const res = await getCommentsByPostId(currentPost.value.id, currentUserId)
+    if ((res as any).success && (res as any).data) {
+      comments.value = res.data
+    }
+  } catch (error) {
+    console.error('获取评论失败:', error)
+  } finally {
+    loadingComments.value = false
+  }
+}
+
+const focusCommentInput = () => {
+  nextTick(() => {
+    commentInputRef.value?.focus()
+  })
+}
+
+const submitComment = async () => {
+  if (!userStore.userInfo?.id) {
+    ElMessage.warning('请先登录')
+    return
+  }
+  if (!currentPost.value || !newComment.value.trim()) return
+  
+  submittingComment.value = true
+  try {
+    const res = await createComment({
+      postId: currentPost.value.id,
+      userId: userStore.userInfo.id,
+      content: newComment.value.trim(),
+      parentId: replyingTo.value?.id
+    })
+    if ((res as any).success) {
+      const newCommentData: CommentInfo = {
+        id: (res as any).data.id,
+        userId: userStore.userInfo.id,
+        postId: currentPost.value.id,
+        parentId: replyingTo.value?.id || null,
+        content: newComment.value.trim(),
+        likesCount: 0,
+        isLiked: false,
+        createdAt: new Date().toISOString(),
+        userName: userStore.userInfo.username || '',
+        userAvatar: userStore.userInfo.avatarUrl || null,
+        nickname: userStore.userInfo.nickname || null,
+        replies: []
+      }
+      
+      if (replyingTo.value) {
+        const parentComment = findCommentById(comments.value, replyingTo.value.id)
+        if (parentComment) {
+          parentComment.replies.unshift(newCommentData)
+        }
+        replyingTo.value = null
+      } else {
+        comments.value.unshift(newCommentData)
+      }
+      
+      if (currentPost.value) {
+        currentPost.value.commentsCount = (currentPost.value.commentsCount || 0) + 1
+      }
+      newComment.value = ''
+      ElMessage.success('评论成功')
+    }
+  } catch (error) {
+    console.error('评论失败:', error)
+    ElMessage.error('评论失败，请重试')
+  } finally {
+    submittingComment.value = false
+  }
+}
+
+const findCommentById = (commentList: CommentInfo[], id: number): CommentInfo | null => {
+  for (const comment of commentList) {
+    if (comment.id === id) return comment
+    const found = findCommentById(comment.replies, id)
+    if (found) return found
+  }
+  return null
+}
+
+const handleCommentLike = async (comment: CommentInfo) => {
+  if (!userStore.userInfo?.id) {
+    ElMessage.warning('请先登录')
+    return
+  }
+  try {
+    const res = await toggleLike({
+      targetType: 'comment',
+      targetId: comment.id,
+      userId: userStore.userInfo.id
+    })
+    if ((res as any).success) {
+      comment.isLiked = (res as any).data.isLiked
+      comment.likesCount = (res as any).data.isLiked ? comment.likesCount + 1 : comment.likesCount - 1
+    }
+  } catch (error) {
+    console.error('点赞失败:', error)
+  }
+}
+
+const replyToComment = (comment: CommentInfo) => {
+  replyingTo.value = comment
+  newComment.value = `@${comment.nickname || comment.userName} `
+  focusCommentInput()
+}
+
+const cancelReply = () => {
+  replyingTo.value = null
+  newComment.value = ''
 }
 
 const handleScroll = () => {
@@ -429,6 +630,8 @@ onUnmounted(() => {
 .post-detail-dialog {
   :deep(.el-dialog__body) {
     padding: 0;
+    max-height: 80vh;
+    overflow-y: auto;
   }
 
   .post-detail {
@@ -504,6 +707,122 @@ onUnmounted(() => {
       .post-detail-actions {
         display: flex;
         gap: 12px;
+      }
+      
+      .comment-section {
+        margin-top: 16px;
+        
+        .comment-input-wrapper {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+          margin-bottom: 20px;
+          
+          .reply-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            background: var(--el-fill-color-light);
+            border-radius: 4px;
+            font-size: 13px;
+            color: var(--color-textSecondary);
+            
+            .cancel-reply {
+              cursor: pointer;
+              color: var(--color-textSecondary);
+              transition: color 0.3s;
+              
+              &:hover {
+                color: var(--color-danger);
+              }
+            }
+          }
+          
+          .el-textarea {
+            flex: 1;
+          }
+          
+          > .el-button {
+            align-self: flex-end;
+          }
+        }
+        
+        .comments-list {
+          .comment-item {
+            display: flex;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--el-border-color-lighter);
+            
+            &:last-child {
+              border-bottom: none;
+            }
+            
+            &.reply-item {
+              margin-top: 12px;
+              padding: 8px 0;
+              padding-left: 48px;
+              border-bottom: none;
+            }
+            
+            .comment-content {
+              flex: 1;
+              
+              .comment-header {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                margin-bottom: 4px;
+                
+                .comment-username {
+                  font-weight: 500;
+                  font-size: 14px;
+                  color: var(--color-text);
+                }
+                
+                .comment-time {
+                  font-size: 12px;
+                  color: var(--color-textSecondary);
+                }
+              }
+              
+              .comment-text {
+                margin: 0 0 8px 0;
+                font-size: 14px;
+                line-height: 1.5;
+                color: var(--color-text);
+              }
+              
+              .comment-actions {
+                display: flex;
+                gap: 16px;
+                
+                .action-btn {
+                  display: flex;
+                  align-items: center;
+                  gap: 4px;
+                  font-size: 12px;
+                  color: var(--color-textSecondary);
+                  cursor: pointer;
+                  transition: color 0.3s;
+                  
+                  &:hover {
+                    color: var(--color-primary);
+                  }
+                  
+                  &.liked {
+                    color: #f56c6c;
+                  }
+                }
+              }
+              
+              .replies-list {
+                margin-top: 8px;
+              }
+            }
+          }
+        }
       }
     }
   }

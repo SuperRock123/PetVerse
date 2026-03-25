@@ -72,6 +72,21 @@ export interface CreateCommentRequest {
   content: string;
 }
 
+export interface CommentInfo {
+  id: number;
+  userId: number;
+  postId: number;
+  parentId: number | null;
+  content: string;
+  likesCount: number;
+  isLiked: boolean;
+  createdAt: string;
+  userName: string;
+  userAvatar: string | null;
+  nickname: string | null;
+  replies: CommentInfo[];
+}
+
 export interface LikeRequest {
   targetType: string;
   targetId: number;
@@ -164,6 +179,22 @@ export const createComment = (data: CreateCommentRequest) => {
     url: "/Post/comment",
     method: "post",
     data,
+  });
+};
+
+export const deleteComment = (commentId: number, userId: number) => {
+  return request({
+    url: `/Post/comment/${commentId}`,
+    method: "delete",
+    params: { userId },
+  });
+};
+
+export const getCommentsByPostId = (postId: number, currentUserId?: number) => {
+  return request({
+    url: `/Post/${postId}/comments`,
+    method: "get",
+    params: currentUserId ? { currentUserId } : {},
   });
 };
 

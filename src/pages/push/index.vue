@@ -145,8 +145,11 @@ const beforeUpload: UploadProps['beforeUpload'] = (rawFile) => {
   return true;
 };
 
-const handleFileChange: UploadProps['onChange'] = async (uploadFile) => {
-  if (uploadFile.status === 'ready' && uploadFile.raw) {
+const handleFileChange: UploadProps['onChange'] = async (uploadFile, uploadFiles) => {
+  if (uploadFile.raw) {
+    const localUrl = URL.createObjectURL(uploadFile.raw);
+    uploadFile.url = localUrl;
+    
     uploadFile.status = 'uploading';
     try {
       const res = await uploadMedia(uploadFile.raw) as any;
@@ -156,16 +159,19 @@ const handleFileChange: UploadProps['onChange'] = async (uploadFile) => {
           mediaId: res.data.id,
           storageKey: res.data.storageKey
         });
+        if (res.data.url) {
+          uploadFile.url = res.data.url;
+        }
         uploadFile.status = 'success';
-        ElMessage.success('图片上传成功');
+        ElMessage.success('上传成功');
       } else {
-        (uploadFile as any).status = 'error';
-        ElMessage.error('图片上传失败');
+        uploadFile.status = 'error';
+        ElMessage.error('上传失败');
       }
     } catch (error) {
-      console.error('上传图片失败:', error);
-      (uploadFile as any).status = 'error';
-      ElMessage.error('图片上传失败');
+      console.error('上传失败:', error);
+      uploadFile.status = 'error';
+      ElMessage.error('上传失败');
     }
   }
 };
