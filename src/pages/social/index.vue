@@ -186,7 +186,8 @@ import { ElMessage } from 'element-plus'
 import { Star, Location, View, ChatDotRound, Loading, Share, Close } from '@element-plus/icons-vue'
 import { LazyImg, Waterfall } from 'vue-waterfall-plugin-next'
 import 'vue-waterfall-plugin-next/dist/style.css'
-import { getPostList, getRecommendedPosts, toggleLike, createComment, getCommentsByPostId, type PostResponse, type CommentInfo } from '@/api/post'
+import { getPostList, getRecommendedPosts, toggleLike, type PostResponse } from '@/api/post'
+import { createComment, getPostComments, type CommentInfo } from '@/api/comment'
 import { useUserStore } from '@/store/userStore'
 
 
@@ -319,8 +320,8 @@ const fetchComments = async () => {
   loadingComments.value = true
   try {
     const currentUserId = userStore.userInfo?.id
-    const res = await getCommentsByPostId(currentPost.value.id, currentUserId)
-    if ((res as any).success && (res as any).data) {
+    const res = await getPostComments(currentPost.value.id, currentUserId)
+    if (res.data) {
       comments.value = res.data
     }
   } catch (error) {
