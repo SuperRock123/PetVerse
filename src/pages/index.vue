@@ -5,10 +5,16 @@
         <a style="display: flex">PetVerse</a>
         <div class="tool-box"></div>
         <div class="input-box">
-          <input type="text" class="search-input" placeholder="搜索宠物相关内容" />
+          <input 
+            type="text" 
+            class="search-input" 
+            placeholder="搜索宠物相关内容" 
+            v-model="searchQuery"
+            @keyup.enter="handleSearch"
+          />
           <div class="input-button">
-            <div class="close-icon"><Close style="width: 1em; height: 1em; margin-right: 8px" /></div>
-            <div class="search-icon"><Search style="width: 1em; height: 1em; margin-right: 8px" /></div>
+            <div class="close-icon" @click="clearSearch"><Close style="width: 1em; height: 1em; margin-right: 8px" /></div>
+            <div class="search-icon" @click="handleSearch"><Search style="width: 1em; height: 1em; margin-right: 8px" /></div>
           </div>
         </div>
         <div class="right">
@@ -171,6 +177,19 @@ import { ref } from "vue";
 const router = useRouter();
 
 const c = ref(true);
+const searchQuery = ref('');
+
+// 处理搜索
+const handleSearch = () => {
+  if (searchQuery.value.trim()) {
+    router.push({ path: '/search', query: { q: searchQuery.value.trim() } });
+  }
+};
+
+// 清空搜索
+const clearSearch = () => {
+  searchQuery.value = '';
+};
 
 const toDashboard = () => {
   router.push({ path: "/dashboard" });

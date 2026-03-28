@@ -56,9 +56,12 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from 'vue';
+import { useRouter } from 'vue-router';
 import { getPetList } from '@/api/pet';
 import { ElMessage } from 'element-plus';
 import { Calendar, ScaleToOriginal, CircleCheck, Picture, Loading } from '@element-plus/icons-vue';
+
+const router = useRouter();
 
 const props = defineProps<{
   userId: number;
@@ -100,7 +103,7 @@ const getHealthClass = (status: string) => {
 };
 
 const viewPetDetail = (pet: any) => {
-  ElMessage.info(`查看 ${pet.name} 的详情`);
+  router.push(`/pet/${pet.id}`);
 };
 
 const fetchPets = async (isLoadMore = false) => {

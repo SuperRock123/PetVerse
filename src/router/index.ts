@@ -238,6 +238,20 @@ export const routes = [
           },
         ],
       },
+      // 搜索模块
+      {
+        path: "/search",
+        component: () => import("@/pages/search/index.vue"),
+        name: "search",
+        meta: { requiresAuth: true }
+      },
+      // 宠物主页
+      {
+        path: "/pet/:id",
+        component: () => import("@/pages/pet/index.vue"),
+        name: "petDetail",
+        meta: { requiresAuth: true }
+      },
     ],
   },
   {

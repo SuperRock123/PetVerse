@@ -150,3 +150,16 @@ export const getUserStats = (userId: number) => {
     method: "get",
   });
 };
+
+// 搜索用户
+export const searchUsers = (params: { keyword: string; page?: number; pageSize?: number }) => {
+  return request({
+    url: "/User",
+    method: "get",
+    params: {
+      Keyword: params.keyword,
+      Page: params.page || 1,
+      PageSize: params.pageSize || 10,
+    },
+  });
+};
