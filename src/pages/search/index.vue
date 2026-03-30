@@ -1,21 +1,5 @@
 <template>
   <div class="search-container">
-    <!-- 搜索框 -->
-    <div class="search-header">
-      <div class="search-input-box">
-        <el-input
-          v-model="searchQuery"
-          placeholder="搜索帖子、用户、宠物"
-          clearable
-          @keyup.enter="handleSearch"
-        >
-          <template #prefix>
-            <el-icon class="el-input__icon"><Search /></el-icon>
-          </template>
-        </el-input>
-        <el-button type="primary" @click="handleSearch">搜索</el-button>
-      </div>
-    </div>
 
     <!-- 搜索结果分类 -->
     <div class="search-tabs" v-if="searchQuery">

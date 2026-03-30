@@ -5,16 +5,33 @@
         <a style="display: flex">PetVerse</a>
         <div class="tool-box"></div>
         <div class="input-box">
-          <input 
-            type="text" 
-            class="search-input" 
-            placeholder="搜索宠物相关内容" 
-            v-model="searchQuery"
-            @keyup.enter="handleSearch"
-          />
-          <div class="input-button">
-            <div class="close-icon" @click="clearSearch"><Close style="width: 1em; height: 1em; margin-right: 8px" /></div>
-            <div class="search-icon" @click="handleSearch"><Search style="width: 1em; height: 1em; margin-right: 8px" /></div>
+          <div class="search-wrapper">
+            <input 
+              type="text" 
+              class="search-input" 
+              placeholder="搜索宠物相关内容" 
+              v-model="searchQuery"
+              @keyup.enter="handleSearch"
+              @focus="showSearchHistory = true"
+              @blur="hideSearchHistory"
+            />
+            <div class="input-button">
+              <div v-if="searchQuery" class="close-icon" @click="clearSearch"><Close style="width: 1em; height: 1em; margin-right: 8px" /></div>
+              <div class="search-icon" @click="handleSearch"><Search style="width: 1em; height: 1em; margin-right: 8px" /></div>
+            </div>
+          </div>
+          <!-- 搜索历史 -->
+          <div v-if="showSearchHistory && searchHistory.length > 0" class="search-history">
+            <div class="history-header">
+              <span>搜索历史</span>
+              <span class="clear-history" @click="clearSearchHistory">清空</span>
+            </div>
+            <ul class="history-list">
+              <li v-for="(item, index) in searchHistory" :key="index" @click="selectSearchHistory(item)">
+                <Search style="width: 0.8em; height: 0.8em; margin-right: 8px" />
+                {{ item }}
+              </li>
+            </ul>
           </div>
         </div>
         <div class="right">
@@ -178,10 +195,14 @@ const router = useRouter();
 
 const c = ref(true);
 const searchQuery = ref('');
+const showSearchHistory = ref(false);
+const searchHistory = ref<string[]>(JSON.parse(localStorage.getItem('searchHistory') || '[]'));
 
 // 处理搜索
 const handleSearch = () => {
   if (searchQuery.value.trim()) {
+    // 添加到搜索历史
+    addToSearchHistory(searchQuery.value.trim());
     router.push({ path: '/search', query: { q: searchQuery.value.trim() } });
   }
 };
@@ -189,6 +210,43 @@ const handleSearch = () => {
 // 清空搜索
 const clearSearch = () => {
   searchQuery.value = '';
+};
+
+// 隐藏搜索历史
+const hideSearchHistory = () => {
+  // 延迟隐藏，以便点击历史记录时能触发点击事件
+  setTimeout(() => {
+    showSearchHistory.value = false;
+  }, 200);
+};
+
+// 选择搜索历史
+const selectSearchHistory = (item: string) => {
+  searchQuery.value = item;
+  handleSearch();
+};
+
+// 添加到搜索历史
+const addToSearchHistory = (query: string) => {
+  // 移除重复项
+  const index = searchHistory.value.indexOf(query);
+  if (index > -1) {
+    searchHistory.value.splice(index, 1);
+  }
+  // 添加到开头
+  searchHistory.value.unshift(query);
+  // 限制历史记录数量
+  if (searchHistory.value.length > 10) {
+    searchHistory.value = searchHistory.value.slice(0, 10);
+  }
+  // 保存到本地存储
+  localStorage.setItem('searchHistory', JSON.stringify(searchHistory.value));
+};
+
+// 清空搜索历史
+const clearSearchHistory = () => {
+  searchHistory.value = [];
+  localStorage.removeItem('searchHistory');
 };
 
 const toDashboard = () => {
@@ -283,66 +341,140 @@ const close = (val: boolean) => {
       }
 
       .input-box {
-        height: 40px;
-        position: fixed;
-        left: 50%;
-        transform: translate(-50%);
+          height: 40px;
+          position: fixed;
+          left: 50%;
+          transform: translate(-50%);
+          z-index: 11;
 
-        @media screen and (max-width: 695px) {
-          display: none;
-        }
+          @media screen and (max-width: 695px) {
+            display: none;
+          }
 
-        @media screen and (min-width: 960px) and (max-width: 1191px) {
-          width: calc(-36px + 50vw);
-        }
+          @media screen and (min-width: 960px) and (max-width: 1191px) {
+            width: calc(-36px + 50vw);
+          }
 
-        @media screen and (min-width: 1192px) and (max-width: 1423px) {
-          width: calc(-33.6px + 40vw);
-        }
+          @media screen and (min-width: 1192px) and (max-width: 1423px) {
+            width: calc(-33.6px + 40vw);
+          }
 
-        @media screen and (min-width: 1424px) and (max-width: 1727px) {
-          width: calc(-42.66667px + 33.33333vw);
-        }
+          @media screen and (min-width: 1424px) and (max-width: 1727px) {
+            width: calc(-42.66667px + 33.33333vw);
+          }
 
-        @media screen and (min-width: 1728px) {
-          width: 533.33333px;
-        }
-        .search-input {
-          padding: 0 84px 0 16px;
-          width: 100%;
-          height: 100%;
-          font-size: 16px;
-          line-height: 120%;
-          color: var(--color-text);
-          caret-color: var(--color-primary);
-          background: rgba(0, 0, 0, 0.03);
-          border-radius: 999px;
-          transition: background-color 0.3s, color 0.3s;
-        }
-
-        .input-button {
-          position: absolute;
-          right: 0;
-          top: 0;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          height: 100%;
-          color: var(--color-textSecondary);
-          transition: color 0.3s;
-
-          .close-icon, .search-icon {
-            width: 40px;
+          @media screen and (min-width: 1728px) {
+            width: 533.33333px;
+          }
+          
+          .search-wrapper {
+            position: relative;
+            width: 100%;
             height: 100%;
+          }
+          
+          .search-input {
+            padding: 0 84px 0 16px;
+            width: 100%;
+            height: 100%;
+            font-size: 16px;
+            line-height: 120%;
+            color: var(--color-text);
+            caret-color: var(--color-primary);
+            background: rgba(0, 0, 0, 0.03);
+            border-radius: 999px;
+            border: 1px solid transparent;
+            transition: all 0.3s ease;
+            outline: none;
+            
+            &:focus {
+              background: #fff;
+              border-color: var(--color-primary);
+              box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.08);
+            }
+          }
+
+          .input-button {
+            position: absolute;
+            right: 0;
+            top: 0;
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
+            height: 100%;
             color: var(--color-textSecondary);
             transition: color 0.3s;
+
+            .close-icon, .search-icon {
+              width: 40px;
+              height: 100%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              cursor: pointer;
+              color: var(--color-textSecondary);
+              transition: color 0.3s;
+              
+              &:hover {
+                color: var(--color-primary);
+              }
+            }
+          }
+          
+          .search-history {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            margin-top: 8px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 12px;
+            z-index: 100;
+            
+            .history-header {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-bottom: 12px;
+              font-size: 14px;
+              font-weight: 500;
+              color: var(--color-text);
+              
+              .clear-history {
+                font-size: 12px;
+                color: var(--color-textSecondary);
+                cursor: pointer;
+                
+                &:hover {
+                  color: var(--color-primary);
+                }
+              }
+            }
+            
+            .history-list {
+              list-style: none;
+              padding: 0;
+              margin: 0;
+              
+              li {
+                display: flex;
+                align-items: center;
+                padding: 8px 12px;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 14px;
+                color: var(--color-text);
+                transition: background-color 0.2s ease;
+                
+                &:hover {
+                  background-color: rgba(0, 0, 0, 0.03);
+                }
+              }
+            }
           }
         }
-      }
 
       .right {
         display: flex;

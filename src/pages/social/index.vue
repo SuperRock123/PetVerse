@@ -99,6 +99,11 @@
               <el-icon><Share /></el-icon>
               分享
             </el-button>
+            <DeleteConfirm 
+              v-if="canDeletePost(currentPost)" 
+              title="确定要删除这个帖子吗？" 
+              @confirm="handleDeletePost(currentPost)"
+            />
           </div>
           
           <el-divider>评论 ({{ currentPost.commentsCount || 0 }})</el-divider>
@@ -142,6 +147,18 @@
                     <span class="action-btn" @click="replyToComment(comment)">
                       回复
                     </span>
+                    <DeleteConfirm 
+                      v-if="canDeleteComment(comment)" 
+                      title="确定要删除这个评论吗？" 
+                      @confirm="handleDeleteComment(comment)"
+                    >
+                      <template #reference>
+                        <span class="action-btn delete-btn">
+                          <el-icon><Delete /></el-icon>
+                          删除
+                        </span>
+                      </template>
+                    </DeleteConfirm>
                   </div>
                   
                   <div class="replies-list" v-if="comment.replies && comment.replies.length > 0">
@@ -163,6 +180,18 @@
                           <span class="action-btn" @click="replyToComment(reply)">
                             回复
                           </span>
+                          <DeleteConfirm 
+                            v-if="canDeleteComment(reply)" 
+                            title="确定要删除这个回复吗？" 
+                            @confirm="handleDeleteComment(reply)"
+                          >
+                            <template #reference>
+                              <span class="action-btn delete-btn">
+                                <el-icon><Delete /></el-icon>
+                                删除
+                              </span>
+                            </template>
+                          </DeleteConfirm>
                         </div>
                       </div>
                     </div>
@@ -183,12 +212,13 @@
 import { ref, onMounted, computed, onUnmounted, nextTick } from 'vue'
 
 import { ElMessage } from 'element-plus'
-import { Star, Location, View, ChatDotRound, Loading, Share, Close } from '@element-plus/icons-vue'
+import { Star, Location, View, ChatDotRound, Loading, Share, Close, Delete } from '@element-plus/icons-vue'
 import { LazyImg, Waterfall } from 'vue-waterfall-plugin-next'
 import 'vue-waterfall-plugin-next/dist/style.css'
-import { getPostList, getRecommendedPosts, toggleLike, type PostResponse } from '@/api/post'
-import { createComment, getPostComments, type CommentInfo } from '@/api/comment'
+import { getPostList, getRecommendedPosts, toggleLike, deletePost, type PostResponse } from '@/api/post'
+import { createComment, getPostComments, deleteComment, type CommentInfo } from '@/api/comment'
 import { useUserStore } from '@/store/userStore'
+import DeleteConfirm from '@/components/DeleteConfirm.vue'
 
 
 const userStore = useUserStore()
@@ -309,10 +339,9 @@ const handleLike = async (post: PostResponse) => {
 const openPostDetail = async (post: PostResponse) => {
   currentPost.value = post
   showPostDetail.value = true
-  comments.value = post.comments || []
-  if (comments.value.length === 0 && post.commentsCount > 0) {
-    await fetchComments()
-  }
+  comments.value = []
+  // 总是调用fetchComments获取最新评论
+  await fetchComments()
 }
 
 const fetchComments = async () => {
@@ -430,6 +459,76 @@ const replyToComment = (comment: CommentInfo) => {
 const cancelReply = () => {
   replyingTo.value = null
   newComment.value = ''
+}
+
+// 检查用户是否有权限删除帖子
+const canDeletePost = (post: PostResponse) => {
+  return userStore.userInfo?.id === post.userId
+}
+
+// 检查用户是否有权限删除评论
+const canDeleteComment = (comment: CommentInfo) => {
+  return userStore.userInfo?.id === comment.userId
+}
+
+// 删除帖子
+const handleDeletePost = async (post: PostResponse) => {
+  if (!userStore.userInfo?.id) {
+    ElMessage.warning('请先登录')
+    return
+  }
+  
+  try {
+    const res = await deletePost(post.id)
+    if ((res as any).success) {
+      // 从帖子列表中移除
+      posts.value = posts.value.filter(p => p.id !== post.id)
+      // 如果当前显示的是被删除的帖子，关闭详情
+      if (currentPost.value?.id === post.id) {
+        showPostDetail.value = false
+        currentPost.value = null
+      }
+      ElMessage.success('删除成功')
+    }
+  } catch (error) {
+    console.error('删除帖子失败:', error)
+    ElMessage.error('删除失败，请重试')
+  }
+}
+
+// 删除评论
+const handleDeleteComment = async (comment: CommentInfo) => {
+  if (!userStore.userInfo?.id) {
+    ElMessage.warning('请先登录')
+    return
+  }
+  
+  try {
+    const res = await deleteComment(comment.id, userStore.userInfo.id)
+    if ((res as any).success) {
+      // 从评论列表中移除
+      removeCommentFromList(comments.value, comment.id)
+      // 更新评论数
+      if (currentPost.value) {
+        currentPost.value.commentsCount = Math.max(0, (currentPost.value.commentsCount || 0) - 1)
+      }
+      ElMessage.success('删除成功')
+    }
+  } catch (error) {
+    console.error('删除评论失败:', error)
+    ElMessage.error('删除失败，请重试')
+  }
+}
+
+// 从评论列表中移除评论
+const removeCommentFromList = (commentList: CommentInfo[], commentId: number) => {
+  for (let i = 0; i < commentList.length; i++) {
+    if (commentList[i].id === commentId) {
+      commentList.splice(i, 1)
+      return
+    }
+    removeCommentFromList(commentList[i].replies, commentId)
+  }
 }
 
 const handleScroll = () => {
@@ -800,22 +899,26 @@ onUnmounted(() => {
                 gap: 16px;
                 
                 .action-btn {
-                  display: flex;
-                  align-items: center;
-                  gap: 4px;
-                  font-size: 12px;
-                  color: var(--color-textSecondary);
-                  cursor: pointer;
-                  transition: color 0.3s;
-                  
-                  &:hover {
-                    color: var(--color-primary);
+                    display: flex;
+                    align-items: center;
+                    gap: 4px;
+                    font-size: 12px;
+                    color: var(--color-textSecondary);
+                    cursor: pointer;
+                    transition: color 0.3s;
+                    
+                    &:hover {
+                      color: var(--color-primary);
+                    }
+                    
+                    &.liked {
+                      color: #f56c6c;
+                    }
+                    
+                    &.delete-btn:hover {
+                      color: var(--color-danger);
+                    }
                   }
-                  
-                  &.liked {
-                    color: #f56c6c;
-                  }
-                }
               }
               
               .replies-list {
